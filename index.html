@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upwork Proposal Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
+            padding: 24px 32px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 4px;
+            padding-right: 8px;
+            border-right: 1px solid #dee2e6;
+        }
+
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+
+        .toolbar-btn {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #495057;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 36px;
+            justify-content: center;
+        }
+
+        .toolbar-btn:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .toolbar-btn.active {
+            background: #6B73FF;
+            color: white;
+            border-color: #6B73FF;
+        }
+
+        .toolbar-btn:active {
+            transform: translateY(1px);
+        }
+
+        .color-picker-wrapper {
+            position: relative;
+        }
+
+        .color-preview {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #dee2e6;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #000000;
+        }
+
+        .color-picker-popup {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 8px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 1000;
+            min-width: 200px;
+        }
+
+        .color-picker-popup.show {
+            display: block;
+        }
+
+        .color-input {
+            width: 100%;
+            height: 40px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        .color-picker-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .color-btn {
+            flex: 1;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .color-btn-apply {
+            background: #6B73FF;
+            color: white;
+        }
+
+        .color-btn-apply:hover {
+            background: #5558dd;
+        }
+
+        .color-btn-cancel {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .color-btn-cancel:hover {
+            background: #dee2e6;
+        }
+
+        .font-size-select {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            background: white;
+            color: #495057;
+        }
+
+        .emoji-picker-btn {
+            position: relative;
+        }
+
+        .emoji-picker {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 8px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 1000;
+            max-width: 280px;
+        }
+
+        .emoji-picker.show {
+            display: block;
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .emoji-item {
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            text-align: center;
+            transition: background 0.2s;
+        }
+
+        .emoji-item:hover {
+            background: #f8f9fa;
+        }
+
+        .editor-wrapper {
+            padding: 32px;
+        }
+
+        .editor {
+            min-height: 400px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #212529;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .editor:focus {
+            border-color: #6B73FF;
+        }
+
+        .editor:empty:before {
+            content: attr(data-placeholder);
+            color: #adb5bd;
+        }
+
+        .actions {
+            padding: 16px 32px 32px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #6B73FF;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: #5558dd;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(107, 115, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .toolbar {
+                gap: 4px;
+                padding: 12px;
+            }
+
+            .toolbar-btn {
+                padding: 6px 10px;
+                font-size: 13px;
+            }
+
+            .editor-wrapper {
+                padding: 20px;
+            }
+
+            .actions {
+                flex-direction: column;
+                padding: 16px 20px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Upwork Proposal Editor</h1>
+            <p>Format your proposal with rich text features that paste perfectly into Upwork</p>
+        </div>
+
+        <div class="toolbar">
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="execCmd('undo')" title="Undo">↶</button>
+                <button class="toolbar-btn" onclick="execCmd('redo')" title="Redo">↷</button>
+            </div>
+
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="toggleFormat('bold')" title="Bold">
+                    <strong>B</strong>
+                </button>
+                <button class="toolbar-btn" onclick="toggleFormat('italic')" title="Italic">
+                    <em>I</em>
+                </button>
+                <button class="toolbar-btn" onclick="toggleFormat('underline')" title="Underline">
+                    <u>U</u>
+                </button>
+            </div>
+
+            <div class="toolbar-group">
+                <select class="font-size-select" onchange="changeFontSize(this.value)" title="Font Size">
+                    <option value="3" selected>Normal</option>
+                    <option value="1">Small</option>
+                    <option value="2">Medium-Small</option>
+                    <option value="4">Medium-Large</option>
+                    <option value="5">Large</option>
+                    <option value="6">Extra Large</option>
+                </select>
+            </div>
+
+            <div class="toolbar-group">
+                <div class="color-picker-wrapper">
+                    <button class="toolbar-btn" onclick="toggleColorPicker()" title="Text Color">
+                        <div class="color-preview" id="colorPreview"></div>
+                    </button>
+                    <div class="color-picker-popup" id="colorPickerPopup">
+                        <input type="color" class="color-input" id="textColor" value="#000000">
+                        <div class="color-picker-actions">
+                            <button class="color-btn color-btn-apply" onclick="applyColor()">Apply</button>
+                            <button class="color-btn color-btn-cancel" onclick="closeColorPicker()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="toolbar-group">
+                <button class="toolbar-btn" onclick="toggleFormat('insertUnorderedList')" title="Bullet List">
+                    • List
+                </button>
+                <button class="toolbar-btn" onclick="toggleFormat('insertOrderedList')" title="Numbered List">
+                    1. List
+                </button>
+            </div>
+
+            <div class="toolbar-group emoji-picker-btn">
+                <button class="toolbar-btn" onclick="toggleEmojiPicker()" title="Insert Emoji">
+                    😊
+                </button>
+                <div class="emoji-picker" id="emojiPicker">
+                    <div class="emoji-grid" id="emojiGrid"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="editor-wrapper">
+            <div class="editor" 
+                 contenteditable="true" 
+                 id="editor"
+                 data-placeholder="Start writing your Upwork proposal here...">
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" onclick="copyToClipboard()">
+                📋 Copy to Clipboard
+            </button>
+            <button class="btn btn-secondary" onclick="clearEditor()">
+                🗑️ Clear
+            </button>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        ✓ Copied to clipboard! Ready to paste in Upwork.
+    </div>
+
+    <script>
+        const editor = document.getElementById('editor');
+        const emojiPicker = document.getElementById('emojiPicker');
+        const colorPickerPopup = document.getElementById('colorPickerPopup');
+        const colorPreview = document.getElementById('colorPreview');
+        const textColorInput = document.getElementById('textColor');
+        let savedSelection = null;
+        
+        // Popular emojis for Upwork proposals
+        const emojis = [
+            '😊', '👋', '✨', '🎯', '💼', '📊', '📈', '🚀',
+            '💡', '✅', '⭐', '🔥', '💪', '🎨', '📝', '💻',
+            '🌟', '👍', '🏆', '📱', '⚡', '🎉', '💰', '📧',
+            '🔧', '⚙️', '📅', '🕐', '✔️', '❤️', '👏', '🙌'
+        ];
+
+        // Populate emoji picker
+        const emojiGrid = document.getElementById('emojiGrid');
+        emojis.forEach(emoji => {
+            const span = document.createElement('span');
+            span.className = 'emoji-item';
+            span.textContent = emoji;
+            span.onclick = () => insertEmoji(emoji);
+            emojiGrid.appendChild(span);
+        });
+
+        function saveSelection() {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                savedSelection = selection.getRangeAt(0);
+            }
+        }
+
+        function restoreSelection() {
+            const selection = window.getSelection();
+            if (savedSelection) {
+                selection.removeAllRanges();
+                selection.addRange(savedSelection);
+            }
+        }
+
+        function execCmd(command, value = null) {
+            document.execCommand(command, false, value);
+            editor.focus();
+        }
+
+        function toggleFormat(command) {
+            execCmd(command);
+            updateToolbarState();
+        }
+
+        function changeFontSize(size) {
+            execCmd('fontSize', size);
+        }
+
+        function toggleColorPicker() {
+            saveSelection();
+            colorPickerPopup.classList.toggle('show');
+            emojiPicker.classList.remove('show');
+        }
+
+        function applyColor() {
+            const color = textColorInput.value;
+            colorPreview.style.background = color;
+            restoreSelection();
+            execCmd('foreColor', color);
+            closeColorPicker();
+        }
+
+        function closeColorPicker() {
+            colorPickerPopup.classList.remove('show');
+            editor.focus();
+        }
+
+        function toggleEmojiPicker() {
+            saveSelection();
+            emojiPicker.classList.toggle('show');
+            colorPickerPopup.classList.remove('show');
+        }
+
+        function insertEmoji(emoji) {
+            restoreSelection();
+            
+            if (savedSelection) {
+                savedSelection.deleteContents();
+                const textNode = document.createTextNode(emoji);
+                savedSelection.insertNode(textNode);
+                
+                // Move cursor after emoji
+                savedSelection.setStartAfter(textNode);
+                savedSelection.setEndAfter(textNode);
+                
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(savedSelection);
+            } else {
+                // Fallback: insert at end if no selection
+                editor.focus();
+                const textNode = document.createTextNode(emoji);
+                editor.appendChild(textNode);
+                
+                // Move cursor after emoji
+                const range = document.createRange();
+                range.setStartAfter(textNode);
+                range.setEndAfter(textNode);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+            
+            emojiPicker.classList.remove('show');
+            editor.focus();
+        }
+
+        function updateToolbarState() {
+            const buttons = document.querySelectorAll('.toolbar-btn');
+            buttons.forEach(btn => {
+                const command = btn.getAttribute('onclick');
+                if (command && command.includes('toggleFormat')) {
+                    const format = command.match(/'([^']+)'/)[1];
+                    if (document.queryCommandState(format)) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                }
+            });
+        }
+
+        async function copyToClipboard() {
+            try {
+                const html = editor.innerHTML;
+                const text = editor.innerText;
+                
+                const clipboardItem = new ClipboardItem({
+                    'text/html': new Blob([html], { type: 'text/html' }),
+                    'text/plain': new Blob([text], { type: 'text/plain' })
+                });
+                
+                await navigator.clipboard.write([clipboardItem]);
+                showNotification();
+            } catch (err) {
+                // Fallback for older browsers
+                const range = document.createRange();
+                range.selectNodeContents(editor);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                document.execCommand('copy');
+                selection.removeAllRanges();
+                showNotification();
+            }
+        }
+
+        function clearEditor() {
+            if (confirm('Are you sure you want to clear all content?')) {
+                editor.innerHTML = '';
+                editor.focus();
+            }
+        }
+
+        function showNotification() {
+            const notification = document.getElementById('notification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close pickers when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.emoji-picker-btn')) {
+                emojiPicker.classList.remove('show');
+            }
+            if (!e.target.closest('.color-picker-wrapper')) {
+                colorPickerPopup.classList.remove('show');
+            }
+        });
+
+        // Save selection before it's lost
+        editor.addEventListener('mouseup', () => {
+            saveSelection();
+            updateToolbarState();
+        });
+        
+        editor.addEventListener('keyup', () => {
+            saveSelection();
+            updateToolbarState();
+        });
+
+        // Focus editor on load
+        window.addEventListener('load', () => {
+            editor.focus();
+        });
+    </script>
+</body>
+</html>
