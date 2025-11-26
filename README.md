@@ -174,9 +174,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨‍💻 Author
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your Name](https://linkedin.com/in/yourprofile)
-- Upwork: [Your Profile](https://upwork.com/freelancers/yourprofile)
+- GitHub: [@syedmfaisal](https://github.com/syedmfaisal)
+- LinkedIn: [syedmfaisal](https://www.linkedin.com/in/syed-muhammad-faisal-5382957/)
+- Upwork: [Syed Muhammad Faisal](https://www.upwork.com/freelancers/~01873392294e6e9521?mp_source=share)
 
 ## 🌟 Show Your Support
 
