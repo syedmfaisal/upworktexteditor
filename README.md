@@ -186,7 +186,7 @@ Give a ⭐️ if this project helped you create better Upwork proposals!
 
 Have questions or suggestions? Feel free to reach out:
 - Open an issue on GitHub
-- Email: your.email@example.com
+- Email: syedmfaisal@hotmail.com
 
 ## 🙏 Acknowledgments
 
